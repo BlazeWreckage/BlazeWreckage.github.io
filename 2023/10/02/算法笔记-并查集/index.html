@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/themes/blue/pace-theme-minimal.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pace/1.2.4/pace.min.js" integrity="sha256-gqd7YTjg/BtfqWSwsJOvndl0Bxc8gFImLEkXQT8+qj0=" crossorigin="anonymous"></script>
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"blazewreckage.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.18.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default","show_result":true},"fold":{"enable":false,"height":500},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="并查集 （英文：\(\rm Disjoint-set\ data\ structure\)，直译为不交集数据结构）是一种 数据结构 ，用于处理一些 不交集 （ $ \rm Merge-find  set$）  类似树形结构，朴素并查集的主要操作：  find （也有人写作 getf（$ \tt get father$））查找第 \(i\) 个集合的祖先 merge 合并两个集">
+<meta property="og:type" content="article">
+<meta property="og:title" content="算法笔记-并查集">
+<meta property="og:url" content="http://blazewreckage.github.io/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%B9%B6%E6%9F%A5%E9%9B%86/index.html">
+<meta property="og:site_name" content="BlazeWreckage&#39;s Blog">
+<meta property="og:description" content="并查集 （英文：\(\rm Disjoint-set\ data\ structure\)，直译为不交集数据结构）是一种 数据结构 ，用于处理一些 不交集 （ $ \rm Merge-find  set$）  类似树形结构，朴素并查集的主要操作：  find （也有人写作 getf（$ \tt get father$））查找第 \(i\) 个集合的祖先 merge 合并两个集">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSU4ju6.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSU5kvt.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSU5wG9.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUIpLV.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUIki4.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUo91A.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUoA78.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUoZtg.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUoxbV.png">
+<meta property="og:image" content="https://s1.ax1x.com/2023/01/28/pSUTSET.png">
+<meta property="article:published_time" content="2023-10-02T07:42:24.000Z">
+<meta property="article:modified_time" content="2023-10-02T07:43:12.671Z">
+<meta property="article:author" content="BlazeWreckage">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s1.ax1x.com/2023/01/28/pSU4ju6.png">
+
+
+<link rel="canonical" href="http://blazewreckage.github.io/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%B9%B6%E6%9F%A5%E9%9B%86/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"http://blazewreckage.github.io/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%B9%B6%E6%9F%A5%E9%9B%86/","path":"2023/10/02/算法笔记-并查集/","title":"算法笔记-并查集"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>算法笔记-并查集 | BlazeWreckage's Blog</title>
+  
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --></head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">BlazeWreckage's Blog</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">Nothing.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#section"><span class="nav-number">1.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#section-1"><span class="nav-number">2.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#section-2"><span class="nav-number">3.</span> <span class="nav-text"></span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#section-3"><span class="nav-number">4.</span> <span class="nav-text"></span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">BlazeWreckage</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">4</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blazewreckage.github.io/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%B9%B6%E6%9F%A5%E9%9B%86/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="BlazeWreckage">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="BlazeWreckage's Blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="算法笔记-并查集 | BlazeWreckage's Blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          算法笔记-并查集
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2023-10-02 15:42:24 / 修改时间：15:43:12" itemprop="dateCreated datePublished" datetime="2023-10-02T15:42:24+08:00">2023-10-02</time>
+    </span>
+
+  
+    <span class="post-meta-break"></span>
+    <span class="post-meta-item" title="本文字数">
+      <span class="post-meta-item-icon">
+        <i class="far fa-file-word"></i>
+      </span>
+      <span class="post-meta-item-text">本文字数：</span>
+      <span>1.9k</span>
+    </span>
+    <span class="post-meta-item" title="阅读时长">
+      <span class="post-meta-item-icon">
+        <i class="far fa-clock"></i>
+      </span>
+      <span class="post-meta-item-text">阅读时长 &asymp;</span>
+      <span>3 分钟</span>
+    </span>
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><blockquote>
+<p>并查集 （英文：<span class="math inline">\(\rm Disjoint-set\ data\
+structure\)</span>，直译为不交集数据结构）是一种 数据结构 ，用于处理一些
+不交集 （ $ \rm Merge-find  set$）</p>
+</blockquote>
+<p>类似树形结构，朴素并查集的主要操作：</p>
+<ol type="1">
+<li><code>find</code> （也有人写作 <code>getf</code>（$ \tt
+get father$））查找第 <span class="math inline">\(i\)</span>
+个集合的祖先</li>
+<li><code>merge</code> 合并两个集合</li>
+<li><code>query</code> 查询两个集合是否是同一个父集合的子集合</li>
+<li><code>init</code> 初始化每个集合为自己</li>
+</ol>
+<p>首先定义 <code>f[]</code> 数组，<code>std::array</code>
+当然也可以，用于存储第 <span class="math inline">\(i\)</span>
+个元素表示第 <span class="math inline">\(i\)</span> 个集合的父亲</p>
+<ul>
+<li><code>find</code></li>
+</ul>
+<p>利用根结点（祖先结点）的父结点是自己这个性质，可以写出
+<code>if</code> 语句</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(f[x] == x)&#123;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>意义即为：如果结点 <span class="math inline">\(x\)</span>
+的父结点是自己，返回自身作为最初查询结点的祖先结点。</p>
+<p>如果不是，就查找父亲结点的父亲结点：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="built_in">find</span>(f[x]);</span><br></pre></td></tr></table></figure>
+<p>完整的 <code>find</code> 函数即为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (f[x] == x) &#123;</span><br><span class="line">    	<span class="keyword">return</span> x;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    	<span class="keyword">return</span> <span class="built_in">find</span>(f[x]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>merge</code></li>
+</ul>
+<p>合并两个集合，只需要把第一个集合的根结点的父结点是设为第二个结点的根结点即可，例如：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSU4ju6.png"
+alt="pSU4ju6.png" />
+<figcaption aria-hidden="true">pSU4ju6.png</figcaption>
+</figure>
+<p>要合并这两个集合，只需将 <span class="math inline">\(1\)</span>
+号结点的父结点设为 <span class="math inline">\(1&#39;\)</span>
+即可，如下：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSU5kvt.png"
+alt="pSU5kvt.png" />
+<figcaption aria-hidden="true">pSU5kvt.png</figcaption>
+</figure>
+<p>写出完整 <code>merge</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">merge</span><span class="params">(<span class="type">int</span> x1, <span class="type">int</span> x2)</span> </span>&#123;</span><br><span class="line">	f[<span class="built_in">find</span>(x1)] = <span class="built_in">find</span>(x2);</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>query</code></li>
+</ul>
+<p>这很简单，只需要看看两个集合的祖先结点是不是一样即可：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">query</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (<span class="built_in">find</span>(a) == <span class="built_in">find</span>(b)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Y&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   cout &lt;&lt; <span class="string">&quot;N&quot;</span>;</span><br><span class="line">   <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><em><code>Y</code> 表示 <code>YES</code> <code>N</code> 表示
+<code>NO</code></em></p>
+<ul>
+<li><code>init</code></li>
+</ul>
+<p>将每个集合的父亲置为自己即可：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">    	f[i] = i;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="section"></h1>
+<p><strong>重点：</strong></p>
+<ol type="1">
+<li>路径压缩</li>
+<li>按秩合并</li>
+<li>启发式合并</li>
+</ol>
+<ul>
+<li>路径压缩：</li>
+</ul>
+<p>我们看这样的一个图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSU5wG9.png"
+alt="pSU5wG9.png" />
+<figcaption aria-hidden="true">pSU5wG9.png</figcaption>
+</figure>
+<p>现在我们要执行 <code>find(6)</code> 查询 <span
+class="math inline">\(6\)</span> 号节点的祖先结点，我们需要一层层遍历到
+<span
+class="math inline">\(1\)</span>，当数据规模很大时，显然会超时，既然
+<code>find</code> 的目的是查找祖先结点，那为什么不直接存储祖先结点？</p>
+<p>这时候定义的 <code>f[]</code> 数组，就用于存储第 <span
+class="math inline">\(i\)</span> 个元素表示第 <span
+class="math inline">\(i\)</span> 个集合的<strong>祖先</strong></p>
+<p>这时候使用了路径压缩之后，上面的图变成了：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUIpLV.png"
+alt="pSUIpLV.png" />
+<figcaption aria-hidden="true">pSUIpLV.png</figcaption>
+</figure>
+<p>这时候再查找复杂度就会降低，那么如何实现路径压缩呢？</p>
+<p>在查询的时候，如果结点 <span class="math inline">\(A\)</span> 是结点
+<span class="math inline">\(B\)</span> 的父亲，结点 <span
+class="math inline">\(C\)</span> 是结点 <span
+class="math inline">\(B\)</span> 的祖先，那么结点 <span
+class="math inline">\(C\)</span> 也一定是结点 <span
+class="math inline">\(A\)</span> 的祖先，如图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUIki4.png"
+alt="pSUIki4.png" />
+<figcaption aria-hidden="true">pSUIki4.png</figcaption>
+</figure>
+<p><code>find</code> 函数变为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (f[x] == x) &#123;</span><br><span class="line">		<span class="keyword">return</span> x;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> f[x] = <span class="built_in">find</span>(f[x]);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>按秩合并</li>
+</ul>
+<p>需要知晓的是，由于路径压缩只在查询时执行，所以并查集<strong>不总是一个菊花图（只有两层的树）</strong>，这样的话，对于两个集合，我是想上面一样把第一个集合接到第二个集合下还是反过来操作呢，看图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUo91A.png"
+alt="pSUo91A.png" />
+<figcaption aria-hidden="true">pSUo91A.png</figcaption>
+</figure>
+<p>如上，集合 <span class="math inline">\(1\)</span> 比集合 <span
+class="math inline">\(1&#39;\)</span>
+复杂很多，这时候我们来执行两种操作：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUoA78.png"
+alt="pSUoA78.png" />
+<figcaption aria-hidden="true">pSUoA78.png</figcaption>
+</figure>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUoZtg.png"
+alt="pSUoZtg.png" />
+<figcaption aria-hidden="true">pSUoZtg.png</figcaption>
+</figure>
+<p>显然第二种（下图）更好处理，所以得出结论：<strong>执行
+<code>merge</code>
+操作时，优先把较小的集合连接到较大的集合上</strong>,我们需要一个
+<code>rk[]</code> 数组来存储每个不交集的<strong>深度</strong></p>
+<p><code>init</code> 函数变为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">		f[i] = i, rk[i] = <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>merge</code> 函数变为：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">merge</span><span class="params">(<span class="type">int</span> x1, <span class="type">int</span> x2)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> fx1 = <span class="built_in">find</span>(x1), fx2 = <span class="built_in">find</span>(x2);</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] &lt;= rk[fx2]) &#123;</span><br><span class="line">		f[fx1] = fx2;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		f[fx2] = fx1;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] == rk[fx2] &amp;&amp; fx1 != fx2) &#123;</span><br><span class="line">		rk[fx2]++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意这句话：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (rk[fx1] == rk[fx2] &amp;&amp; fx1 != fx2) &#123;</span><br><span class="line">	rk[fx2]++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这句话的意思是，如果两个集合的深度相同，祖先不同，那么合并后的集合深度要
+<span class="math inline">\(+1\)</span> ，这是为什么？看图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUoxbV.png"
+alt="pSUoxbV.png" />
+<figcaption aria-hidden="true">pSUoxbV.png</figcaption>
+</figure>
+<p>对这两个满足上述要求的集合执行按秩合并操作：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUTSET.png"
+alt="pSUTSET.png" />
+<figcaption aria-hidden="true">pSUTSET.png</figcaption>
+</figure>
+<p>​ 树的深度变成了 <span class="math inline">\(4(3+1)\)</span></p>
+<ul>
+<li>启发式合并</li>
+</ul>
+<p><code>rk[]</code> 数组不再储存深度而是大小（结点个数）</p>
+<h1 id="section-1"></h1>
+<p><strong>复杂度：</strong></p>
+<p>前置：</p>
+<p>定义 <span class="math inline">\(A_k(j)\)</span> 为：</p>
+<p><span class="math display">\[
+A_k(j)=\left\{
+\begin{aligned}
+&amp;j+1&amp; &amp;k=0&amp;\\
+&amp;A_{k-1}^{(j+1)}(j)&amp; &amp;k\geq1&amp;
+\end{aligned}
+\right.
+\]</span></p>
+<p>即阿克曼函数。</p>
+<p>这里，<span class="math inline">\(f^i(x)\)</span> 表示将 <span
+class="math inline">\(f\)</span> 连续应用在 <span
+class="math inline">\(x\)</span> 上 <span
+class="math inline">\(i\)</span> 次，即 <span
+class="math inline">\(f^0(x)=x\)</span>，<span
+class="math inline">\(f^i(x)=f(f^{i-1}(x))\)</span>。</p>
+<p>定义 <span class="math inline">\(\alpha(n)\)</span> 为使得 <span
+class="math inline">\(A_{\alpha(n)}(1)\geq n\)</span> 的最小整数值。</p>
+<p>复杂度统计：</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">实现方式</th>
+<th style="text-align: center;">平均</th>
+<th style="text-align: center;">最坏</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">朴素</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(n)\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">路径压缩</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\alpha (n))\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">按秩合并</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">路径压缩+按秩合并</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\alpha (n))\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\alpha (n))\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>特别地，并查集空间复杂度为 <span
+class="math inline">\(\mathcal{O}(n)\)</span>，初始化时间复杂度为 <span
+class="math inline">\(\mathcal{O}(n)\)</span></p>
+<h1 id="section-2"></h1>
+<p><strong>例题：</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P3367">P3367
+【模板】并查集</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P3402">P3402
+可持久化并查集</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.luogu.com.cn/problem/P1551">P1551 亲戚</a></p>
+<h1 id="section-3"></h1>
+<p><strong>代码：</strong></p>
+<p><em>此代码可过模板题，路径压缩+按秩合并</em></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//code by __er</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> JS ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr)</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> f[<span class="number">10001</span>], rk[<span class="number">10001</span>], n, m, a, b, op;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (f[x] == x) &#123;</span><br><span class="line">		<span class="keyword">return</span> x;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> f[x] = <span class="built_in">find</span>(f[x]);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">merge</span><span class="params">(<span class="type">int</span> x1, <span class="type">int</span> x2)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> fx1 = <span class="built_in">find</span>(x1), fx2 = <span class="built_in">find</span>(x2);</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] &lt;= rk[fx2]) &#123;</span><br><span class="line">		f[fx1] = fx2;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		f[fx2] = fx1;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] == rk[fx2] &amp;&amp; fx1 != fx2) &#123;</span><br><span class="line">		rk[fx2]++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">query</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">find</span>(a) == <span class="built_in">find</span>(b)) &#123;</span><br><span class="line">		cout &lt;&lt; <span class="string">&quot;Y&quot;</span>;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;N&quot;</span>;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">		f[i] = i, rk[i] = <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	JS;</span><br><span class="line">	cin &gt;&gt; n &gt;&gt; m;</span><br><span class="line">	<span class="built_in">init</span>();</span><br><span class="line">	<span class="keyword">while</span> (m--) &#123;</span><br><span class="line">		cin &gt;&gt; op &gt;&gt; a &gt;&gt; b;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">1</span>) &#123;</span><br><span class="line">			<span class="built_in">merge</span>(a, b);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">2</span>) &#123;</span><br><span class="line">			<span class="built_in">query</span>(a, b)	, cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%A0%86/" rel="prev" title="算法笔记-堆">
+                  <i class="fa fa-angle-left"></i> 算法笔记-堆
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-BSGS/" rel="next" title="算法笔记-BSGS">
+                  算法笔记-BSGS <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2023</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">BlazeWreckage</span>
+  </div>
+<div class="wordcount">
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-line"></i>
+    </span>
+    <span title="站点总字数">8k</span>
+  </span>
+  <span class="post-meta-item">
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">14 分钟</span>
+  </span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/schemes/muse.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  <script src="/js/third-party/pace.js"></script>
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+
+</body>
+</html>

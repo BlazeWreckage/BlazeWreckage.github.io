@@ -1,45 +1,565 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Hello World</title>
-    <url>/2023/10/02/hello-world/</url>
-    <content><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very
-first post. Check <a href="https://hexo.io/docs/">documentation</a> for
-more info. If you get any problems when using Hexo, you can find the
-answer in <a
-href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or
-you can ask me on <a
-href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="quick-start">Quick Start</h2>
-<h3 id="create-a-new-post">Create a new post</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a
-href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="run-server">Run server</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="generate-static-files">Generate static files</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a
-href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="deploy-to-remote-sites">Deploy to remote sites</h3>
-<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a
-href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+    <title>算法笔记-BSGS</title>
+    <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-BSGS/</url>
+    <content><![CDATA[<blockquote>
+<p>BSGS（Baby Step Giant Step），大步小步算法，用于求解离散对数。</p>
+</blockquote>
+<p>有 <span class="math inline">\(a^x=b \pmod p\)</span>，给定 <span
+class="math inline">\(a,b,p\)</span> 的值，求 <span
+class="math inline">\(x\)</span> 的值。</p>
+<p>因为 <span class="math inline">\(a \perp
+p\)</span>，很容易想到欧拉定理。</p>
+<p><span class="math display">\[a^0 \equiv 1 \pmod p\]</span></p>
+<p><span class="math display">\[a^{\varphi(p)} \equiv 1 \pmod
+p\]</span></p>
+<p>所以 <span class="math inline">\(a^x\)</span> 在模 <span
+class="math inline">\(p\)</span> 意义下有长度为 <span
+class="math inline">\(\varphi(p)\)</span>
+的循环节，求解此问题可以使用暴力，复杂度 <span
+class="math inline">\(O(\varphi(p))\)</span>，也就是 <span
+class="math inline">\(O(p)\)</span>。</p>
+<p>将 <span class="math inline">\(x\)</span> 拆为 <span
+class="math inline">\(mk-n\)</span>，则：</p>
+<p><span class="math display">\[a^{mk-n}\equiv b \pmod p\]</span></p>
+<p><span class="math display">\[a^{mk}\equiv a^n b \pmod p\]</span></p>
+<p>考虑预处理 <span class="math inline">\(a^n b\)</span>
+的所有取值，对于每一个 <span class="math inline">\(k\)</span>，计算
+<span class="math inline">\(a^{mk}\)</span> 的值，如果这个值与之前计算
+<span class="math inline">\(a^n b\)</span> 的值有重复，则 <span
+class="math inline">\(mk-n\)</span> 即为最小解。</p>
+<p>当 <span class="math inline">\(k=\sqrt{p}\)</span> 时，可以保证枚举完
+<span class="math inline">\(x \in [1,p-1]\)</span>，时间复杂度 <span
+class="math inline">\(O(\sqrt{p})\)</span>。</p>
+<p>哈希一下即可。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/extc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> int long long</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> __gnu_cxx;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> __gnu_pbds;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> a, b, p;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">BSGS</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b, <span class="type">int</span> p)</span> </span>&#123;</span><br><span class="line">	gp_hash_table&lt;<span class="type">int</span>, <span class="type">int</span>&gt; h;<span class="comment">//gp_hash_table 好闪，拜谢 gp_hash_table，umap 什么垃圾，爬.</span></span><br><span class="line">	h.<span class="built_in">clear</span>();</span><br><span class="line">	<span class="type">int</span> c = <span class="number">1</span>, k = <span class="built_in">sqrt</span>(p) + <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= k; i++) &#123;</span><br><span class="line">		c *= a, c %= p;</span><br><span class="line">		h[b * c % p] = i;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="type">int</span> t = c;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= k; i++) &#123;</span><br><span class="line">		<span class="keyword">auto</span> it = h.<span class="built_in">find</span>(t);</span><br><span class="line">		<span class="keyword">if</span> (it != h.<span class="built_in">end</span>()) &#123;</span><br><span class="line">			<span class="keyword">return</span> i * k - it -&gt; second;</span><br><span class="line">		&#125;</span><br><span class="line">		t *= c, t %= p;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">signed</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>), cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>), cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">	cin &gt;&gt; p &gt;&gt; a &gt;&gt; b;</span><br><span class="line">	<span class="type">int</span> ans = <span class="built_in">BSGS</span>(a, b, p);</span><br><span class="line">	<span class="keyword">if</span> (ans == <span class="number">-1</span>) <span class="keyword">return</span> cout &lt;&lt; <span class="string">&quot;no solution&quot;</span>, <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">return</span> cout &lt;&lt; ans, <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
   </entry>
   <entry>
-    <title>test</title>
-    <url>/2023/10/02/test/</url>
-    <content><![CDATA[<h1 id="一级">一级</h1>
-<h2 id="二级">二级</h2>
-<h3 id="三级">三级</h3>
-<h4 id="四级">四级</h4>
-<h5 id="五级">五级</h5>
-<p><em>斜体</em></p>
-<p><strong>加粗</strong></p>
-<p><del>删除</del></p>
-<p><span class="math inline">\(1\)</span></p>
+    <title>算法笔记-并查集</title>
+    <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%B9%B6%E6%9F%A5%E9%9B%86/</url>
+    <content><![CDATA[<blockquote>
+<p>并查集 （英文：<span class="math inline">\(\rm Disjoint-set\ data\
+structure\)</span>，直译为不交集数据结构）是一种 数据结构 ，用于处理一些
+不交集 （ $ \rm Merge-find  set$）</p>
+</blockquote>
+<p>类似树形结构，朴素并查集的主要操作：</p>
+<ol type="1">
+<li><code>find</code> （也有人写作 <code>getf</code>（$ \tt
+get father$））查找第 <span class="math inline">\(i\)</span>
+个集合的祖先</li>
+<li><code>merge</code> 合并两个集合</li>
+<li><code>query</code> 查询两个集合是否是同一个父集合的子集合</li>
+<li><code>init</code> 初始化每个集合为自己</li>
+</ol>
+<p>首先定义 <code>f[]</code> 数组，<code>std::array</code>
+当然也可以，用于存储第 <span class="math inline">\(i\)</span>
+个元素表示第 <span class="math inline">\(i\)</span> 个集合的父亲</p>
+<ul>
+<li><code>find</code></li>
+</ul>
+<p>利用根结点（祖先结点）的父结点是自己这个性质，可以写出
+<code>if</code> 语句</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span>(f[x] == x)&#123;</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>意义即为：如果结点 <span class="math inline">\(x\)</span>
+的父结点是自己，返回自身作为最初查询结点的祖先结点。</p>
+<p>如果不是，就查找父亲结点的父亲结点：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="built_in">find</span>(f[x]);</span><br></pre></td></tr></table></figure>
+<p>完整的 <code>find</code> 函数即为：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (f[x] == x) &#123;</span><br><span class="line">    	<span class="keyword">return</span> x;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    	<span class="keyword">return</span> <span class="built_in">find</span>(f[x]);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>merge</code></li>
+</ul>
+<p>合并两个集合，只需要把第一个集合的根结点的父结点是设为第二个结点的根结点即可，例如：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSU4ju6.png"
+alt="pSU4ju6.png" />
+<figcaption aria-hidden="true">pSU4ju6.png</figcaption>
+</figure>
+<p>要合并这两个集合，只需将 <span class="math inline">\(1\)</span>
+号结点的父结点设为 <span class="math inline">\(1&#39;\)</span>
+即可，如下：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSU5kvt.png"
+alt="pSU5kvt.png" />
+<figcaption aria-hidden="true">pSU5kvt.png</figcaption>
+</figure>
+<p>写出完整 <code>merge</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">merge</span><span class="params">(<span class="type">int</span> x1, <span class="type">int</span> x2)</span> </span>&#123;</span><br><span class="line">	f[<span class="built_in">find</span>(x1)] = <span class="built_in">find</span>(x2);</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>query</code></li>
+</ul>
+<p>这很简单，只需要看看两个集合的祖先结点是不是一样即可：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">query</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">if</span> (<span class="built_in">find</span>(a) == <span class="built_in">find</span>(b)) &#123;</span><br><span class="line">        cout &lt;&lt; <span class="string">&quot;Y&quot;</span>;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">   &#125;</span><br><span class="line">   cout &lt;&lt; <span class="string">&quot;N&quot;</span>;</span><br><span class="line">   <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><em><code>Y</code> 表示 <code>YES</code> <code>N</code> 表示
+<code>NO</code></em></p>
+<ul>
+<li><code>init</code></li>
+</ul>
+<p>将每个集合的父亲置为自己即可：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">    	f[i] = i;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="section"></h1>
+<p><strong>重点：</strong></p>
+<ol type="1">
+<li>路径压缩</li>
+<li>按秩合并</li>
+<li>启发式合并</li>
+</ol>
+<ul>
+<li>路径压缩：</li>
+</ul>
+<p>我们看这样的一个图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSU5wG9.png"
+alt="pSU5wG9.png" />
+<figcaption aria-hidden="true">pSU5wG9.png</figcaption>
+</figure>
+<p>现在我们要执行 <code>find(6)</code> 查询 <span
+class="math inline">\(6\)</span> 号节点的祖先结点，我们需要一层层遍历到
+<span
+class="math inline">\(1\)</span>，当数据规模很大时，显然会超时，既然
+<code>find</code> 的目的是查找祖先结点，那为什么不直接存储祖先结点？</p>
+<p>这时候定义的 <code>f[]</code> 数组，就用于存储第 <span
+class="math inline">\(i\)</span> 个元素表示第 <span
+class="math inline">\(i\)</span> 个集合的<strong>祖先</strong></p>
+<p>这时候使用了路径压缩之后，上面的图变成了：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUIpLV.png"
+alt="pSUIpLV.png" />
+<figcaption aria-hidden="true">pSUIpLV.png</figcaption>
+</figure>
+<p>这时候再查找复杂度就会降低，那么如何实现路径压缩呢？</p>
+<p>在查询的时候，如果结点 <span class="math inline">\(A\)</span> 是结点
+<span class="math inline">\(B\)</span> 的父亲，结点 <span
+class="math inline">\(C\)</span> 是结点 <span
+class="math inline">\(B\)</span> 的祖先，那么结点 <span
+class="math inline">\(C\)</span> 也一定是结点 <span
+class="math inline">\(A\)</span> 的祖先，如图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUIki4.png"
+alt="pSUIki4.png" />
+<figcaption aria-hidden="true">pSUIki4.png</figcaption>
+</figure>
+<p><code>find</code> 函数变为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (f[x] == x) &#123;</span><br><span class="line">		<span class="keyword">return</span> x;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> f[x] = <span class="built_in">find</span>(f[x]);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>按秩合并</li>
+</ul>
+<p>需要知晓的是，由于路径压缩只在查询时执行，所以并查集<strong>不总是一个菊花图（只有两层的树）</strong>，这样的话，对于两个集合，我是想上面一样把第一个集合接到第二个集合下还是反过来操作呢，看图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUo91A.png"
+alt="pSUo91A.png" />
+<figcaption aria-hidden="true">pSUo91A.png</figcaption>
+</figure>
+<p>如上，集合 <span class="math inline">\(1\)</span> 比集合 <span
+class="math inline">\(1&#39;\)</span>
+复杂很多，这时候我们来执行两种操作：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUoA78.png"
+alt="pSUoA78.png" />
+<figcaption aria-hidden="true">pSUoA78.png</figcaption>
+</figure>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUoZtg.png"
+alt="pSUoZtg.png" />
+<figcaption aria-hidden="true">pSUoZtg.png</figcaption>
+</figure>
+<p>显然第二种（下图）更好处理，所以得出结论：<strong>执行
+<code>merge</code>
+操作时，优先把较小的集合连接到较大的集合上</strong>,我们需要一个
+<code>rk[]</code> 数组来存储每个不交集的<strong>深度</strong></p>
+<p><code>init</code> 函数变为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">		f[i] = i, rk[i] = <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>merge</code> 函数变为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">merge</span><span class="params">(<span class="type">int</span> x1, <span class="type">int</span> x2)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> fx1 = <span class="built_in">find</span>(x1), fx2 = <span class="built_in">find</span>(x2);</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] &lt;= rk[fx2]) &#123;</span><br><span class="line">		f[fx1] = fx2;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		f[fx2] = fx1;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] == rk[fx2] &amp;&amp; fx1 != fx2) &#123;</span><br><span class="line">		rk[fx2]++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意这句话：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">if</span> (rk[fx1] == rk[fx2] &amp;&amp; fx1 != fx2) &#123;</span><br><span class="line">	rk[fx2]++;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这句话的意思是，如果两个集合的深度相同，祖先不同，那么合并后的集合深度要
+<span class="math inline">\(+1\)</span> ，这是为什么？看图：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUoxbV.png"
+alt="pSUoxbV.png" />
+<figcaption aria-hidden="true">pSUoxbV.png</figcaption>
+</figure>
+<p>对这两个满足上述要求的集合执行按秩合并操作：</p>
+<figure>
+<img src="https://s1.ax1x.com/2023/01/28/pSUTSET.png"
+alt="pSUTSET.png" />
+<figcaption aria-hidden="true">pSUTSET.png</figcaption>
+</figure>
+<p>​ 树的深度变成了 <span class="math inline">\(4(3+1)\)</span></p>
+<ul>
+<li>启发式合并</li>
+</ul>
+<p><code>rk[]</code> 数组不再储存深度而是大小（结点个数）</p>
+<h1 id="section-1"></h1>
+<p><strong>复杂度：</strong></p>
+<p>前置：</p>
+<p>定义 <span class="math inline">\(A_k(j)\)</span> 为：</p>
+<p><span class="math display">\[
+A_k(j)=\left\{
+\begin{aligned}
+&amp;j+1&amp; &amp;k=0&amp;\\
+&amp;A_{k-1}^{(j+1)}(j)&amp; &amp;k\geq1&amp;
+\end{aligned}
+\right.
+\]</span></p>
+<p>即阿克曼函数。</p>
+<p>这里，<span class="math inline">\(f^i(x)\)</span> 表示将 <span
+class="math inline">\(f\)</span> 连续应用在 <span
+class="math inline">\(x\)</span> 上 <span
+class="math inline">\(i\)</span> 次，即 <span
+class="math inline">\(f^0(x)=x\)</span>，<span
+class="math inline">\(f^i(x)=f(f^{i-1}(x))\)</span>。</p>
+<p>定义 <span class="math inline">\(\alpha(n)\)</span> 为使得 <span
+class="math inline">\(A_{\alpha(n)}(1)\geq n\)</span> 的最小整数值。</p>
+<p>复杂度统计：</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: center;">实现方式</th>
+<th style="text-align: center;">平均</th>
+<th style="text-align: center;">最坏</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">朴素</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(n)\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">路径压缩</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\alpha (n))\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">按秩合并</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\log n)\)</span></td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">路径压缩+按秩合并</td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\alpha (n))\)</span></td>
+<td style="text-align: center;"><span
+class="math inline">\(\mathcal{O}(\alpha (n))\)</span></td>
+</tr>
+</tbody>
+</table>
+<p>特别地，并查集空间复杂度为 <span
+class="math inline">\(\mathcal{O}(n)\)</span>，初始化时间复杂度为 <span
+class="math inline">\(\mathcal{O}(n)\)</span></p>
+<h1 id="section-2"></h1>
+<p><strong>例题：</strong></p>
+<p><a href="https://www.luogu.com.cn/problem/P3367">P3367
+【模板】并查集</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P3402">P3402
+可持久化并查集</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1551">P1551 亲戚</a></p>
+<h1 id="section-3"></h1>
+<p><strong>代码：</strong></p>
+<p><em>此代码可过模板题，路径压缩+按秩合并</em></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">//code by __er</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> JS ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr)</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> f[<span class="number">10001</span>], rk[<span class="number">10001</span>], n, m, a, b, op;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">find</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (f[x] == x) &#123;</span><br><span class="line">		<span class="keyword">return</span> x;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> f[x] = <span class="built_in">find</span>(f[x]);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">merge</span><span class="params">(<span class="type">int</span> x1, <span class="type">int</span> x2)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> fx1 = <span class="built_in">find</span>(x1), fx2 = <span class="built_in">find</span>(x2);</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] &lt;= rk[fx2]) &#123;</span><br><span class="line">		f[fx1] = fx2;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		f[fx2] = fx1;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">if</span> (rk[fx1] == rk[fx2] &amp;&amp; fx1 != fx2) &#123;</span><br><span class="line">		rk[fx2]++;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">query</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">find</span>(a) == <span class="built_in">find</span>(b)) &#123;</span><br><span class="line">		cout &lt;&lt; <span class="string">&quot;Y&quot;</span>;</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	cout &lt;&lt; <span class="string">&quot;N&quot;</span>;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">1</span>; i &lt;= n; i++) &#123;</span><br><span class="line">		f[i] = i, rk[i] = <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	JS;</span><br><span class="line">	cin &gt;&gt; n &gt;&gt; m;</span><br><span class="line">	<span class="built_in">init</span>();</span><br><span class="line">	<span class="keyword">while</span> (m--) &#123;</span><br><span class="line">		cin &gt;&gt; op &gt;&gt; a &gt;&gt; b;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">1</span>) &#123;</span><br><span class="line">			<span class="built_in">merge</span>(a, b);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">2</span>) &#123;</span><br><span class="line">			<span class="built_in">query</span>(a, b)	, cout &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+  </entry>
+  <entry>
+    <title>算法笔记-堆</title>
+    <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%A0%86/</url>
+    <content><![CDATA[<blockquote>
+<p>堆（$ \rm
+Heap$）是计算机科学中一类特殊的数据结构的统称。堆通常是一个可以被看做一棵树的数组对象。堆总是满足下列性质：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>堆中某个结点的值总是不大于或不小于其父结点的值；</li>
+<li>堆总是一棵完全二叉树。</li>
+</ul>
+</blockquote>
+<p>上面提到的性质 <span class="math inline">\(1\)</span>
+中，如果不大于即为大根堆，如果不小于即为小根堆，看图：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaPP0S.png" /></p>
+<p>如上是大根堆。</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaPDtH.png" /></p>
+<p>如上是小根堆。</p>
+<p>堆实质上是一颗二叉树，二叉树的存储使用一维数组，编号为 <span
+class="math inline">\(i\)</span> 的结点的父结点编号为 <span
+class="math inline">\(\left\lfloor\dfrac{i}{2}\right\rfloor\)</span>，左儿子编号为
+<span class="math inline">\(2 \times i\)</span>，右儿子编号为 <span
+class="math inline">\(2 \times i +1\)</span>。</p>
+<p>因为性质 <span class="math inline">\(1\)</span>，堆还能用于排序。</p>
+<h1 id="section"></h1>
+<p><strong>手写堆：</strong></p>
+<p>手写堆虽然麻烦，但是效率比较高，尽管有替代品但是这是理解堆及二叉树思想的最好方法，<strong>以下讲解为小根堆</strong>。</p>
+<p>首先三个 <code>#define</code></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> f(x) (((x)-1)/2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> l(x) ((x)*2+1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> r(x) ((x)*2+2)</span></span><br></pre></td></tr></table></figure>
+<p>三个宏定义分别表示 <span class="math inline">\(x\)</span>
+结点的<strong>父亲</strong>，<strong>左儿子</strong>，<strong>右儿子</strong>（<span
+class="math inline">\(+1+2\)</span> 为个人喜好）。</p>
+<p>操作如下：</p>
+<ol type="1">
+<li><code>push</code> 向堆中压入一个元素</li>
+<li><code>pop</code> （也有写法写作 <code>del</code>(<span
+class="math inline">\(\tt
+delete\)</span>)）从堆中弹出（删除）堆顶元素</li>
+<li><code>top</code> 查询堆顶元素</li>
+</ol>
+<ul>
+<li><code>push</code>：</li>
+</ul>
+<p>压入一个元素，首先堆元素数量（大小）<code>siz</code> 需要 <span
+class="math inline">\(+1\)</span>，从堆底加入，如果不满足小根堆的性质（见堆的性质
+<span
+class="math inline">\(1\)</span>），则不断上调直至满足性质（即父结点小于当前结点）。</p>
+<p>例如对此堆执行 <code>push(0)</code></p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaPDtH.png" /></p>
+<p>首先在堆底插入：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaiNCj.png" /></p>
+<p>因为 <span class="math inline">\(3&gt;0\)</span> 所以上调：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaioVO.png" /></p>
+<p>因为 <span class="math inline">\(1&gt;0\)</span> 所以继续上调：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSai7Ie.png" /></p>
+<p>因为 <span class="math inline">\(0&lt;1\)</span> 所以操作结束。</p>
+<p><code>push</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = siz++;<span class="comment">//在堆底插入</span></span><br><span class="line">	<span class="comment">/*上调操作*/</span><span class="keyword">while</span> (pos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[<span class="built_in">f</span>(pos)] &lt;= x) &#123;<span class="comment">//如果父结点小于当前结点，满足性质</span></span><br><span class="line">			<span class="keyword">break</span>;<span class="comment">//停止</span></span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[<span class="built_in">f</span>(pos)], pos = <span class="built_in">f</span>(pos);<span class="comment">//互换位置</span></span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;<span class="comment">//确定位置后赋值</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>pop</code>：</li>
+</ul>
+<p>首先使用堆底结点替换掉堆顶元素（先删掉堆顶元素），然后对替换上来的结点不断下调直至满足性质。</p>
+<p>我们对刚刚进行过 <code>push</code> 操作的堆进行 <code>pop</code>
+操作：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSai7Ie.png" /></p>
+<p>执行 <code>pop</code> 使用 <span class="math inline">\(3\)</span>
+代替 <span class="math inline">\(0\)</span> 变为：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaF9Ig.png" /></p>
+<p>因为 <span class="math inline">\(3&gt;1\)</span> 所以下调：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaFFRs.png" /></p>
+<p>因为 <span class="math inline">\(1\)</span>
+已经是根结点（整个堆/整棵树中最小的），所以操作结束。</p>
+<p><code>pop</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = <span class="number">0</span>, x = heap[--siz];</span><br><span class="line">	<span class="keyword">while</span> (<span class="built_in">l</span>(pos) &lt; siz) &#123;</span><br><span class="line">		<span class="type">int</span> t = (heap[<span class="built_in">l</span>(pos)] &lt; heap[<span class="built_in">r</span>(pos)]) ? <span class="built_in">l</span>(pos) : <span class="built_in">r</span>(pos);<span class="comment">//找较小儿子</span></span><br><span class="line">		<span class="comment">/*下调操作*/</span><span class="keyword">if</span> (heap[t] &gt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[t], pos = t;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	heap[pos] = x;<span class="comment">//同上</span></span><br><span class="line">  	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>top</code>：</li>
+</ul>
+<p>返回堆顶元素，也就是最小的元素。</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaFFRs.png" /></p>
+<p>执行 <code>top</code> ，返回顶端的 <span
+class="math inline">\(1\)</span> 且 <span
+class="math inline">\(1\)</span> 为堆中的最小元素。</p>
+<p><code>top</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="section-1"></h1>
+<p><strong>代码</strong>：</p>
+<p><em>此代码可过模板题</em></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> f(x) (((x)-1)/2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> l(x) ((x)*2+1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> r(x) ((x)*2+2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> JS ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr)</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> heap[<span class="number">1000001</span>], siz;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = siz++;</span><br><span class="line">	<span class="keyword">while</span> (pos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[<span class="built_in">f</span>(pos)] &lt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[<span class="built_in">f</span>(pos)], pos = <span class="built_in">f</span>(pos);</span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = <span class="number">0</span>, x = heap[--siz];</span><br><span class="line">	<span class="keyword">while</span> (<span class="built_in">l</span>(pos) &lt; siz) &#123;</span><br><span class="line">		<span class="type">int</span> t = (heap[<span class="built_in">l</span>(pos)] &lt; heap[<span class="built_in">r</span>(pos)]) ? <span class="built_in">l</span>(pos) : <span class="built_in">r</span>(pos);</span><br><span class="line">		<span class="keyword">if</span> (heap[t] &gt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[t], pos = t;</span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> T, num, op;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	JS;</span><br><span class="line">	cin &gt;&gt; T;</span><br><span class="line">	<span class="keyword">while</span> (T--) &#123;</span><br><span class="line">		cin &gt;&gt; op;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">1</span>) &#123;</span><br><span class="line">			cin &gt;&gt; num;</span><br><span class="line">			<span class="built_in">push</span>(num);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">2</span>) &#123;</span><br><span class="line">			cout &lt;&lt; <span class="built_in">top</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">3</span>) &#123;</span><br><span class="line">			<span class="built_in">pop</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="section-2"></h1>
+<p><strong>STL</strong></p>
+<p>STL 实现的堆有两种：</p>
+<ol type="1">
+<li><p><code>std::heap</code>（堆）</p></li>
+<li><p><code>std::priority_queue</code>（优先队列）</p></li>
+</ol>
+<ul>
+<li><code>std::heap</code></li>
+</ul>
+<p>在头文件 <code>&lt;algotithm&gt;</code> 中，使用 <code>heap</code> 需
+<code>include</code> 或使用万能头。</p>
+<p><code>make_heap()</code>：</p>
+<p>先指定一个容器的范围建堆，常用
+<code>vector</code>，建堆执行后最大值在所给范围的最左端，<strong>其他值并未排序</strong>。</p>
+<p>使用方法：<code>make_heap(v.begin(),v.end,_Comp/*自定义比较函数，非必要*/);</code><em><code>v</code>
+代表 <code>vector</code> 的名称</em></p>
+<p><code>v.push_back()</code>
+压入一个元素，但元素并未排序（没有进行上调操作）。</p>
+<p><code>push_heap()</code>
+对刚刚压入元素的堆执行上调，用法：<code>push_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
+<p><code>pop_heap()</code> 等价于手写堆的 <code>pop</code>
+弹出（删除）堆顶（最大值），用法：<code>pop_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
+<p><code>sort_heap()</code>
+执行堆排序，可得到一个有序序列，用法：<code>sort_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
+<ul>
+<li><code>std::priority_queue</code>：</li>
+</ul>
+<p>底层使用 <code>std::heap</code> 实现。</p>
+<p>定义：<code>priority_queue&lt;T/*数据类型*/,Cotainer/*容器*/,Compare/*比较规则，可以使用自定义*/&gt;</code></p>
+<p>自带两种比较函数：</p>
+<ol type="1">
+<li><code>greater&lt;T/*数据类型*/&gt;</code> 小根堆</li>
+<li><code>less&lt;T/*数据类型*/&gt;</code> 大根堆</li>
+</ol>
+<p>操作：</p>
+<p><code>push()</code> 压入元素，构造完毕后压入（执行上调）。</p>
+<p><code>emplace()</code>同时执行构造和压入（执行上调）。</p>
+<p><code>pop()</code> 弹出堆顶。</p>
+<p><code>top()</code> 返回堆顶元素。</p>
+<p><code>size()</code> 返回堆大小（元素个数）。</p>
+<p><code>empty()</code> 查询堆是否为空，返回值为 <code>bool</code>
+类型，堆为空时返回 <code>true</code>，否则返回 <code>false</code>。</p>
+<p>使用方法都为：<code>q.成员函数()</code> <em><code>q</code> 代表
+<code>priority_queue</code> 的名称</em>。</p>
+<h1 id="section-3"></h1>
+<p>**pb__ds**</p>
+<p><code>pb__ds</code> （<span class="math inline">\(\tt Policy-Based\
+Data\ Structures\)</span>）库包含于 <code>__gnu_pbds</code>
+命名空间里，使用其中的堆需要两个头文件：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ext/pb_ds/assoc_container.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ext/pb_ds/priority_queue.hpp&gt;</span> </span></span><br></pre></td></tr></table></figure>
+<p>**万能头不能解决问题，<code>&lt;bits/stdc++.h&gt;</code>
+只包含标准库的所有头文件，而pb__ds库是扩展库！**</p>
+<p>定义方法：</p>
+<p><code>__gnu_pbds::priority_queue&lt;T, Compare = std::less&lt;T&gt;, Tag = __gnu_pbds::pairing_heap_tag, Allocator = std::allocator&lt;char&gt;&gt;</code></p>
+<p><code>Tag</code> 决定了堆的类型，共有五种堆：</p>
+<ol type="1">
+<li><code>__gnu_pbds::pairing_heap_tag</code> 配对堆
+<code>push,pop</code> 效率较好，<code>push,join</code> 复杂度为 <span
+class="math inline">\(\mathcal{O}(1)\)</span>，但 <code>pop</code>
+的最差复杂度很高。</li>
+<li><code>__gnu_pbds::binary_heap_tag</code> 二叉堆
+<code>push,pop</code> 效率高。</li>
+<li><code>__gnu_pbds::binomial_heap_tag</code> 二项堆
+<code>push,pop</code> 效率较差，但 <code>pop</code>
+函数的时间复杂度最慢只有亚线性。</li>
+<li><code>__gnu_pbds::rc_binomial_heap_tag</code> 冗余计数二项堆
+相比二项堆 <code>push,pop</code> 更差，但是 <code>push</code> <span
+class="math inline">\(\mathcal{O}(1)\)</span>。</li>
+<li><code>__gnu_pbds::thin_heap_tag</code>
+斐波那契堆（注：合并堆的复杂度与斐波那契堆不同）适合图论算法，在一些方面甚至优于斐波那契堆，不过由于封装过紧，常数大，反而在非图论算法上最劣。</li>
+</ol>
+<p>操作：</p>
+<ol type="1">
+<li><code>push()</code> 压入元素。</li>
+<li><code>pop()</code> 弹出堆顶元素。</li>
+<li><code>top()</code> 返回堆顶元素。</li>
+<li><code>empty()</code> 返回是否为空（返回值 <code>bool</code>
+类型）。</li>
+<li><code>size()</code> 返回堆大小。</li>
+<li><code>modify(iterator, key)</code> 修改迭代器位置的值。</li>
+<li><code>erase(iterator)</code> 删除迭代器位置的值。</li>
+<li><code>join()</code> 把另一个堆和当前堆合并并清空被合并的堆。</li>
+</ol>
+<p>时间复杂度：</p>
+<p><span class="math inline">\(\begin{array}{llllll} &amp; \text { push
+} &amp; \text {pop } &amp; \text { modify } &amp; \text { erase } &amp;
+\text { join } \\ \small \text { std::priority\_queue } &amp; \Theta(n)
+/ \Theta(\log n) &amp;\Theta(\log n) &amp; \Theta(n \log n) &amp;
+\Theta(n \log n) &amp; \Theta(n \log n) \\ \small \text {
+\_\_gnu\_pbds::pairing\_heap\_tag } &amp; \mathcal{O}(1) &amp; \Theta(n)
+/ \Theta(\log n) &amp;\Theta(n) / \Theta(\log n) &amp; \Theta(n) /
+\Theta(\log n)&amp; \mathcal{O}(1) \\ \small \text {
+\_\_gnu\_pbds::binary\_heap\_tag } &amp; \Theta(n) / \Theta(\log n)
+&amp;\Theta(n) / \Theta(\log n) &amp;\Theta(n) &amp; \Theta(n) &amp;
+\Theta(n) \\ \small \text { \_\_gnu\_pbds::binomial\_heap\_tag } &amp;
+\Theta(\log n) / \mathcal{O}(1) &amp;\Theta(\log n) &amp; \Theta(\log n)
+&amp; \Theta(\log n) &amp; \Theta(\log n) \\ \small \text {
+\_\_gnu\_pbds::rc\_binomial\_heap\_tag } &amp; \mathcal{O}(1) &amp;
+\Theta(\log n) &amp; \Theta(\log n) &amp; \Theta(\log n) &amp;
+\Theta(\log n) \\ \small \text { \_\_gnu\_pbds::thin\_heap\_tag } &amp;
+\mathcal{O}(1) &amp; \Theta(n) / \Theta(\log n) &amp;\Theta(\log n) /
+\mathcal{O}(1) &amp;\Theta(n) / \Theta(\log n) &amp; \mathcal{O}(n)
+\end{array}\)</span></p>
+<h1 id="section-4"></h1>
+<p><strong>斐波那契堆</strong>：</p>
+<p>斐波那契堆是堆的集合，比二叉堆拥有更高的效率，但是由于常数比较大而且不好写所以不常用。</p>
+<p><strong>堆优化 dijkstra</strong>：</p>
+<p>每次更新最短距离的时候把对应的元素上调，每次从小根堆中取堆顶做下一次要用的顶点，从复杂度
+<span class="math inline">\(\mathcal{O}(V^2)\)</span> 优化到 <span
+class="math inline">\(\mathcal{O}(E \log V)\)</span>。</p>
+<h1 id="section-5"></h1>
+<p><strong>复杂度</strong>：</p>
+<p>除建堆和 <code>top()</code> 操作是 <span
+class="math inline">\(\mathcal{O}(1)\)</span> 外，其余操作全部为 <span
+class="math inline">\(\mathcal{O}(\log n)\)</span>。</p>
+<h1 id="section-6"></h1>
+<p><strong>例题</strong>：</p>
+<p><a href="https://www.luogu.com.cn/problem/P3378">P3378
+【模板】堆</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P3377">P3377
+【模板】左偏树（可并堆)</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1628">P1628
+合并序列</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>算法笔记-自适应辛普森法</title>
+    <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E8%87%AA%E9%80%82%E5%BA%94%E8%BE%9B%E6%99%AE%E6%A3%AE%E6%B3%95/</url>
+    <content><![CDATA[<blockquote>
+<p>辛普森法（Simpson），是一种求数值积分的方法。</p>
+</blockquote>
+<p>求积分的时候，可以将其分成无穷多个小区间或者用
+牛顿-莱布尼茨公式。</p>
+<p>如果不能用这两种方法，就有了 数值积分。</p>
+<p>辛普森法的核心思想就是把函数 <span class="math inline">\(f\)</span>
+近似地看成<strong>二次函数</strong>，于是给出辛普森公式的推导：</p>
+<p>由于把 <span class="math inline">\(f\)</span>
+近似地看成二次函数，所以，对于二次函数 <span
+class="math inline">\(f(x)=ax^2+bx+c\)</span>，求积分可得：</p>
+<p><span class="math display">\[\displaystyle F(x)=\int^x_0
+f(x)\mathrm{d}x=\dfrac{a}{3}x^3+\dfrac{b}{2}x^2+cx+k\]</span></p>
+<p>其中 <span class="math inline">\(k\)</span> 为一个常数，那么：</p>
+<p><span class="math display">\[\begin{aligned}
+\int_{l}^{r} f(x) \mathrm{d} x &amp; =F(r)-F(l) \\
+&amp;
+=\frac{a}{3}\left(r^{3}-l^{3}\right)+\frac{b}{2}\left(r^{2}-l^{2}\right)+c(r-l)
+\\
+&amp; =(r-l)\left(\frac{a}{3}\left(l^{2}+r^{2}+l
+r\right)+\frac{b}{2}(l+r)+c\right) \\
+&amp; =\frac{r-l}{6}\left(2 a l^{2}+2 a r^{2}+2 a l r+3 b l+3 b r+6
+c\right) \\
+&amp; =\frac{r-l}{6}\left(\left(a l^{2}+b l+c\right)+\left(a r^{2}+b
+r+c\right)+4\left(a\left(\frac{l+r}{2}\right)^{2}+b\left(\frac{l+r}{2}\right)+c\right)\right)
+\\
+&amp; =\frac{r-l}{6}\left(f(l)+f(r)+4 f\left(\frac{l+r}{2}\right)\right)
+\end{aligned}\]</span></p>
+<p>稍微改写下形式就得到了辛普森公式：</p>
+<p><span class="math display">\[\int_{l}^{r} f(x) \mathrm{d}
+x=\dfrac{r-l\left(f(l)+f(r)+4
+f\left(\frac{l+r}{2}\right)\right)}{6}\]</span></p>
+<ol type="1">
+<li>辛普森法</li>
+</ol>
+<p>有一自然数 <span class="math inline">\(n\)</span>，将区间 <span
+class="math inline">\([l,r]\)</span> 分成等长的 <span
+class="math inline">\(2n\)</span>
+个区间，计算每个小区间的积分值，求和可得总积分。</p>
+<p>对于 <span class="math inline">\([x_{2i},x_{2i-2}]\)</span>
+的一段区间，选定三个点 <span class="math inline">\(\left(
+x_{2i-2},x_{2i-1},x_{2i} \right)\)</span>，构成抛物线，得到函数 <span
+class="math inline">\(f^{&#39;}(x)\)</span>，于是，原来计算么个小区间的积分值就可以转化为求二次函数
+<span class="math inline">\(f^{&#39;}(x)\)</span> 的值，而 <span
+class="math inline">\(f^{&#39;}(x)\)</span>
+可以用辛普森公式近似计算。</p>
+<p>代码实现很简单，就不再赘述了。</p>
+<ol start="2" type="1">
+<li>自适应辛普森法</li>
+</ol>
+<p>从上文可知，结果的进度取决于 <span class="math inline">\(n\)</span>
+的取值，所以，如果一段积分已经很接近二次函数了，误差值在接受范围内，就可以不用往下继续分段了。</p>
+<p>可以对于一段积分先代入辛普森公式求值，然后再将这段积分平分成两段继续求积分，如果差值小于要求的精度
+<span class="math inline">\(eps\)</span> 就直接返回。</p>
+<h1 id="quad"><span class="math inline">\(\quad\)</span></h1>
+<p><a href="https://www.luogu.com.cn/problem/P4525">[模板]自适应辛普森法
+1</a></p>
+<p>标准模板，没什么好说的：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">double</span> eps = <span class="number">1e-6</span>;</span><br><span class="line"><span class="type">double</span> a, b, c, d, l, r;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">f</span><span class="params">(<span class="type">double</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> (c * x + d) / (a * x + b);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">simpson</span><span class="params">(<span class="type">double</span> l, <span class="type">double</span> r)</span> </span>&#123;</span><br><span class="line">	<span class="type">double</span> mid = (l + r) / <span class="number">2.0</span>;</span><br><span class="line">	<span class="keyword">return</span> (<span class="built_in">f</span>(l) + <span class="number">4.0</span> * <span class="built_in">f</span>(mid) + <span class="built_in">f</span>(r)) * (r - l) / <span class="number">6.0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">asr</span><span class="params">(<span class="type">double</span> l, <span class="type">double</span> r, <span class="type">double</span> eps, <span class="type">double</span> ans)</span> </span>&#123;</span><br><span class="line">	<span class="type">double</span> mid = (l + r) / <span class="number">2.0</span>, l_ = <span class="built_in">simpson</span>(l, mid), r_ = <span class="built_in">simpson</span>(mid, r);</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">fabs</span>(l_ + r_ - ans) &lt;= <span class="number">15.0</span> * eps) <span class="keyword">return</span> l_ + r_ + (l_ + r_ - ans) / <span class="number">15.0</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">asr</span>(l, mid, eps / <span class="number">2.0</span>, l_) + <span class="built_in">asr</span>(mid, r, eps / <span class="number">2.0</span>, r_);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>), cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>), cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">	cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; l &gt;&gt; r;</span><br><span class="line">	cout &lt;&lt; fixed &lt;&lt; <span class="built_in">setprecision</span>(<span class="number">6</span>) &lt;&lt; <span class="built_in">asr</span>(l, r, eps, <span class="built_in">simpson</span>(l, r));</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><a href="https://www.luogu.com.cn/problem/P4526">[模板]自适应辛普森法
+2</a></p>
+<p>一看，<span
+class="math inline">\(\int^\infty_0\)</span>，可辛普森法只能求定值积分，所以别急，画了图像就能知道，当
+<span class="math inline">\(a&lt;0\)</span>
+时，积分发散，就不用求了，剩下的套模板 1 即可。</p>
+<p>精度多取两位保险。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">double</span> eps = <span class="number">1e-8</span>;</span><br><span class="line"><span class="type">double</span> a, b, c, d, l, r;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">f</span><span class="params">(<span class="type">double</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">pow</span>(x, (a / x) - x);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">simpson</span><span class="params">(<span class="type">double</span> l, <span class="type">double</span> r)</span> </span>&#123;</span><br><span class="line">	<span class="type">double</span> mid = (l + r) / <span class="number">2.0</span>;</span><br><span class="line">	<span class="keyword">return</span> (<span class="built_in">f</span>(l) + <span class="number">4.0</span> * <span class="built_in">f</span>(mid) + <span class="built_in">f</span>(r)) * (r - l) / <span class="number">6.0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">asr</span><span class="params">(<span class="type">double</span> l, <span class="type">double</span> r, <span class="type">double</span> eps, <span class="type">double</span> ans)</span> </span>&#123;</span><br><span class="line">	<span class="type">double</span> mid = (l + r) / <span class="number">2.0</span>, l_ = <span class="built_in">simpson</span>(l, mid), r_ = <span class="built_in">simpson</span>(mid, r);</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">fabs</span>(l_ + r_ - ans) &lt;= <span class="number">15.0</span> * eps) <span class="keyword">return</span> l_ + r_ + (l_ + r_ - ans) / <span class="number">15.0</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">asr</span>(l, mid, eps / <span class="number">2.0</span>, l_) + <span class="built_in">asr</span>(mid, r, eps / <span class="number">2.0</span>, r_);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>), cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>), cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">	cin &gt;&gt; a;</span><br><span class="line">	<span class="keyword">if</span> (a &lt; <span class="number">0</span>) <span class="keyword">return</span> cout &lt;&lt; <span class="string">&quot;orz&quot;</span>, <span class="number">0</span>;</span><br><span class="line">	cout &lt;&lt; fixed &lt;&lt; <span class="built_in">setprecision</span>(<span class="number">5</span>) &lt;&lt; <span class="built_in">asr</span>(eps, <span class="number">15.0</span>, eps, <span class="built_in">simpson</span>(l, r));</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 ]]></content>
   </entry>
 </search>
