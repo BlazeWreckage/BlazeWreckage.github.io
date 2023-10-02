@@ -37,6 +37,221 @@ class="math inline">\(O(\sqrt{p})\)</span>。</p>
 ]]></content>
   </entry>
   <entry>
+    <title>算法笔记-堆</title>
+    <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%A0%86/</url>
+    <content><![CDATA[<blockquote>
+<p>堆（$ \rm
+Heap$）是计算机科学中一类特殊的数据结构的统称。堆通常是一个可以被看做一棵树的数组对象。堆总是满足下列性质：</p>
+</blockquote>
+<blockquote>
+<ul>
+<li>堆中某个结点的值总是不大于或不小于其父结点的值；</li>
+<li>堆总是一棵完全二叉树。</li>
+</ul>
+</blockquote>
+<p>上面提到的性质 <span class="math inline">\(1\)</span>
+中，如果不大于即为大根堆，如果不小于即为小根堆，看图：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaPP0S.png" /></p>
+<p>如上是大根堆。</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaPDtH.png" /></p>
+<p>如上是小根堆。</p>
+<p>堆实质上是一颗二叉树，二叉树的存储使用一维数组，编号为 <span
+class="math inline">\(i\)</span> 的结点的父结点编号为 <span
+class="math inline">\(\left\lfloor\dfrac{i}{2}\right\rfloor\)</span>，左儿子编号为
+<span class="math inline">\(2 \times i\)</span>，右儿子编号为 <span
+class="math inline">\(2 \times i +1\)</span>。</p>
+<p>因为性质 <span class="math inline">\(1\)</span>，堆还能用于排序。</p>
+<h1 id="section"></h1>
+<p><strong>手写堆：</strong></p>
+<p>手写堆虽然麻烦，但是效率比较高，尽管有替代品但是这是理解堆及二叉树思想的最好方法，<strong>以下讲解为小根堆</strong>。</p>
+<p>首先三个 <code>#define</code></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> f(x) (((x)-1)/2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> l(x) ((x)*2+1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> r(x) ((x)*2+2)</span></span><br></pre></td></tr></table></figure>
+<p>三个宏定义分别表示 <span class="math inline">\(x\)</span>
+结点的<strong>父亲</strong>，<strong>左儿子</strong>，<strong>右儿子</strong>（<span
+class="math inline">\(+1+2\)</span> 为个人喜好）。</p>
+<p>操作如下：</p>
+<ol type="1">
+<li><code>push</code> 向堆中压入一个元素</li>
+<li><code>pop</code> （也有写法写作 <code>del</code>(<span
+class="math inline">\(\tt
+delete\)</span>)）从堆中弹出（删除）堆顶元素</li>
+<li><code>top</code> 查询堆顶元素</li>
+</ol>
+<ul>
+<li><code>push</code>：</li>
+</ul>
+<p>压入一个元素，首先堆元素数量（大小）<code>siz</code> 需要 <span
+class="math inline">\(+1\)</span>，从堆底加入，如果不满足小根堆的性质（见堆的性质
+<span
+class="math inline">\(1\)</span>），则不断上调直至满足性质（即父结点小于当前结点）。</p>
+<p>例如对此堆执行 <code>push(0)</code></p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaPDtH.png" /></p>
+<p>首先在堆底插入：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaiNCj.png" /></p>
+<p>因为 <span class="math inline">\(3&gt;0\)</span> 所以上调：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaioVO.png" /></p>
+<p>因为 <span class="math inline">\(1&gt;0\)</span> 所以继续上调：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSai7Ie.png" /></p>
+<p>因为 <span class="math inline">\(0&lt;1\)</span> 所以操作结束。</p>
+<p><code>push</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = siz++;<span class="comment">//在堆底插入</span></span><br><span class="line">	<span class="comment">/*上调操作*/</span><span class="keyword">while</span> (pos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[<span class="built_in">f</span>(pos)] &lt;= x) &#123;<span class="comment">//如果父结点小于当前结点，满足性质</span></span><br><span class="line">			<span class="keyword">break</span>;<span class="comment">//停止</span></span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[<span class="built_in">f</span>(pos)], pos = <span class="built_in">f</span>(pos);<span class="comment">//互换位置</span></span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;<span class="comment">//确定位置后赋值</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>pop</code>：</li>
+</ul>
+<p>首先使用堆底结点替换掉堆顶元素（先删掉堆顶元素），然后对替换上来的结点不断下调直至满足性质。</p>
+<p>我们对刚刚进行过 <code>push</code> 操作的堆进行 <code>pop</code>
+操作：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSai7Ie.png" /></p>
+<p>执行 <code>pop</code> 使用 <span class="math inline">\(3\)</span>
+代替 <span class="math inline">\(0\)</span> 变为：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaF9Ig.png" /></p>
+<p>因为 <span class="math inline">\(3&gt;1\)</span> 所以下调：</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaFFRs.png" /></p>
+<p>因为 <span class="math inline">\(1\)</span>
+已经是根结点（整个堆/整棵树中最小的），所以操作结束。</p>
+<p><code>pop</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = <span class="number">0</span>, x = heap[--siz];</span><br><span class="line">	<span class="keyword">while</span> (<span class="built_in">l</span>(pos) &lt; siz) &#123;</span><br><span class="line">		<span class="type">int</span> t = (heap[<span class="built_in">l</span>(pos)] &lt; heap[<span class="built_in">r</span>(pos)]) ? <span class="built_in">l</span>(pos) : <span class="built_in">r</span>(pos);<span class="comment">//找较小儿子</span></span><br><span class="line">		<span class="comment">/*下调操作*/</span><span class="keyword">if</span> (heap[t] &gt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[t], pos = t;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	heap[pos] = x;<span class="comment">//同上</span></span><br><span class="line">  	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><code>top</code>：</li>
+</ul>
+<p>返回堆顶元素，也就是最小的元素。</p>
+<p><img src="https://s1.ax1x.com/2023/01/28/pSaFFRs.png" /></p>
+<p>执行 <code>top</code> ，返回顶端的 <span
+class="math inline">\(1\)</span> 且 <span
+class="math inline">\(1\)</span> 为堆中的最小元素。</p>
+<p><code>top</code> 函数为：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="section-1"></h1>
+<p><strong>代码</strong>：</p>
+<p><em>此代码可过模板题</em></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> f(x) (((x)-1)/2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> l(x) ((x)*2+1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> r(x) ((x)*2+2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> JS ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr)</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> heap[<span class="number">1000001</span>], siz;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = siz++;</span><br><span class="line">	<span class="keyword">while</span> (pos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[<span class="built_in">f</span>(pos)] &lt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[<span class="built_in">f</span>(pos)], pos = <span class="built_in">f</span>(pos);</span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = <span class="number">0</span>, x = heap[--siz];</span><br><span class="line">	<span class="keyword">while</span> (<span class="built_in">l</span>(pos) &lt; siz) &#123;</span><br><span class="line">		<span class="type">int</span> t = (heap[<span class="built_in">l</span>(pos)] &lt; heap[<span class="built_in">r</span>(pos)]) ? <span class="built_in">l</span>(pos) : <span class="built_in">r</span>(pos);</span><br><span class="line">		<span class="keyword">if</span> (heap[t] &gt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[t], pos = t;</span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> T, num, op;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	JS;</span><br><span class="line">	cin &gt;&gt; T;</span><br><span class="line">	<span class="keyword">while</span> (T--) &#123;</span><br><span class="line">		cin &gt;&gt; op;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">1</span>) &#123;</span><br><span class="line">			cin &gt;&gt; num;</span><br><span class="line">			<span class="built_in">push</span>(num);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">2</span>) &#123;</span><br><span class="line">			cout &lt;&lt; <span class="built_in">top</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">3</span>) &#123;</span><br><span class="line">			<span class="built_in">pop</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="section-2"></h1>
+<p><strong>STL</strong></p>
+<p>STL 实现的堆有两种：</p>
+<ol type="1">
+<li><p><code>std::heap</code>（堆）</p></li>
+<li><p><code>std::priority_queue</code>（优先队列）</p></li>
+</ol>
+<ul>
+<li><code>std::heap</code></li>
+</ul>
+<p>在头文件 <code>&lt;algotithm&gt;</code> 中，使用 <code>heap</code> 需
+<code>include</code> 或使用万能头。</p>
+<p><code>make_heap()</code>：</p>
+<p>先指定一个容器的范围建堆，常用
+<code>vector</code>，建堆执行后最大值在所给范围的最左端，<strong>其他值并未排序</strong>。</p>
+<p>使用方法：<code>make_heap(v.begin(),v.end,_Comp/*自定义比较函数，非必要*/);</code><em><code>v</code>
+代表 <code>vector</code> 的名称</em></p>
+<p><code>v.push_back()</code>
+压入一个元素，但元素并未排序（没有进行上调操作）。</p>
+<p><code>push_heap()</code>
+对刚刚压入元素的堆执行上调，用法：<code>push_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
+<p><code>pop_heap()</code> 等价于手写堆的 <code>pop</code>
+弹出（删除）堆顶（最大值），用法：<code>pop_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
+<p><code>sort_heap()</code>
+执行堆排序，可得到一个有序序列，用法：<code>sort_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
+<ul>
+<li><code>std::priority_queue</code>：</li>
+</ul>
+<p>底层使用 <code>std::heap</code> 实现。</p>
+<p>定义：<code>priority_queue&lt;T/*数据类型*/,Cotainer/*容器*/,Compare/*比较规则，可以使用自定义*/&gt;</code></p>
+<p>自带两种比较函数：</p>
+<ol type="1">
+<li><code>greater&lt;T/*数据类型*/&gt;</code> 小根堆</li>
+<li><code>less&lt;T/*数据类型*/&gt;</code> 大根堆</li>
+</ol>
+<p>操作：</p>
+<p><code>push()</code> 压入元素，构造完毕后压入（执行上调）。</p>
+<p><code>emplace()</code>同时执行构造和压入（执行上调）。</p>
+<p><code>pop()</code> 弹出堆顶。</p>
+<p><code>top()</code> 返回堆顶元素。</p>
+<p><code>size()</code> 返回堆大小（元素个数）。</p>
+<p><code>empty()</code> 查询堆是否为空，返回值为 <code>bool</code>
+类型，堆为空时返回 <code>true</code>，否则返回 <code>false</code>。</p>
+<p>使用方法都为：<code>q.成员函数()</code> <em><code>q</code> 代表
+<code>priority_queue</code> 的名称</em>。</p>
+<h1 id="section-3"></h1>
+<p>**pb__ds**</p>
+<p><code>pb__ds</code> （<span class="math inline">\(\tt Policy-Based\
+Data\ Structures\)</span>）库包含于 <code>__gnu_pbds</code>
+命名空间里，使用其中的堆需要两个头文件：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ext/pb_ds/assoc_container.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ext/pb_ds/priority_queue.hpp&gt;</span> </span></span><br></pre></td></tr></table></figure>
+<p>**万能头不能解决问题，<code>&lt;bits/stdc++.h&gt;</code>
+只包含标准库的所有头文件，而pb__ds库是扩展库！**</p>
+<p>定义方法：</p>
+<p><code>__gnu_pbds::priority_queue&lt;T, Compare = std::less&lt;T&gt;, Tag = __gnu_pbds::pairing_heap_tag, Allocator = std::allocator&lt;char&gt;&gt;</code></p>
+<p><code>Tag</code> 决定了堆的类型，共有五种堆：</p>
+<ol type="1">
+<li><code>__gnu_pbds::pairing_heap_tag</code> 配对堆
+<code>push,pop</code> 效率较好，<code>push,join</code> 复杂度为 <span
+class="math inline">\(\mathcal{O}(1)\)</span>，但 <code>pop</code>
+的最差复杂度很高。</li>
+<li><code>__gnu_pbds::binary_heap_tag</code> 二叉堆
+<code>push,pop</code> 效率高。</li>
+<li><code>__gnu_pbds::binomial_heap_tag</code> 二项堆
+<code>push,pop</code> 效率较差，但 <code>pop</code>
+函数的时间复杂度最慢只有亚线性。</li>
+<li><code>__gnu_pbds::rc_binomial_heap_tag</code> 冗余计数二项堆
+相比二项堆 <code>push,pop</code> 更差，但是 <code>push</code> <span
+class="math inline">\(\mathcal{O}(1)\)</span>。</li>
+<li><code>__gnu_pbds::thin_heap_tag</code>
+斐波那契堆（注：合并堆的复杂度与斐波那契堆不同）适合图论算法，在一些方面甚至优于斐波那契堆，不过由于封装过紧，常数大，反而在非图论算法上最劣。</li>
+</ol>
+<p>操作：</p>
+<ol type="1">
+<li><code>push()</code> 压入元素。</li>
+<li><code>pop()</code> 弹出堆顶元素。</li>
+<li><code>top()</code> 返回堆顶元素。</li>
+<li><code>empty()</code> 返回是否为空（返回值 <code>bool</code>
+类型）。</li>
+<li><code>size()</code> 返回堆大小。</li>
+<li><code>modify(iterator, key)</code> 修改迭代器位置的值。</li>
+<li><code>erase(iterator)</code> 删除迭代器位置的值。</li>
+<li><code>join()</code> 把另一个堆和当前堆合并并清空被合并的堆。</li>
+</ol>
+<p>时间复杂度：</p>
+<p><span class="math inline">\(\begin{array}{llllll} &amp; \text { push
+} &amp; \text {pop } &amp; \text { modify } &amp; \text { erase } &amp;
+\text { join } \\ \small \text { std::priority\_queue } &amp; \Theta(n)
+/ \Theta(\log n) &amp;\Theta(\log n) &amp; \Theta(n \log n) &amp;
+\Theta(n \log n) &amp; \Theta(n \log n) \\ \small \text {
+\_\_gnu\_pbds::pairing\_heap\_tag } &amp; \mathcal{O}(1) &amp; \Theta(n)
+/ \Theta(\log n) &amp;\Theta(n) / \Theta(\log n) &amp; \Theta(n) /
+\Theta(\log n)&amp; \mathcal{O}(1) \\ \small \text {
+\_\_gnu\_pbds::binary\_heap\_tag } &amp; \Theta(n) / \Theta(\log n)
+&amp;\Theta(n) / \Theta(\log n) &amp;\Theta(n) &amp; \Theta(n) &amp;
+\Theta(n) \\ \small \text { \_\_gnu\_pbds::binomial\_heap\_tag } &amp;
+\Theta(\log n) / \mathcal{O}(1) &amp;\Theta(\log n) &amp; \Theta(\log n)
+&amp; \Theta(\log n) &amp; \Theta(\log n) \\ \small \text {
+\_\_gnu\_pbds::rc\_binomial\_heap\_tag } &amp; \mathcal{O}(1) &amp;
+\Theta(\log n) &amp; \Theta(\log n) &amp; \Theta(\log n) &amp;
+\Theta(\log n) \\ \small \text { \_\_gnu\_pbds::thin\_heap\_tag } &amp;
+\mathcal{O}(1) &amp; \Theta(n) / \Theta(\log n) &amp;\Theta(\log n) /
+\mathcal{O}(1) &amp;\Theta(n) / \Theta(\log n) &amp; \mathcal{O}(n)
+\end{array}\)</span></p>
+<h1 id="section-4"></h1>
+<p><strong>斐波那契堆</strong>：</p>
+<p>斐波那契堆是堆的集合，比二叉堆拥有更高的效率，但是由于常数比较大而且不好写所以不常用。</p>
+<p><strong>堆优化 dijkstra</strong>：</p>
+<p>每次更新最短距离的时候把对应的元素上调，每次从小根堆中取堆顶做下一次要用的顶点，从复杂度
+<span class="math inline">\(\mathcal{O}(V^2)\)</span> 优化到 <span
+class="math inline">\(\mathcal{O}(E \log V)\)</span>。</p>
+<h1 id="section-5"></h1>
+<p><strong>复杂度</strong>：</p>
+<p>除建堆和 <code>top()</code> 操作是 <span
+class="math inline">\(\mathcal{O}(1)\)</span> 外，其余操作全部为 <span
+class="math inline">\(\mathcal{O}(\log n)\)</span>。</p>
+<h1 id="section-6"></h1>
+<p><strong>例题</strong>：</p>
+<p><a href="https://www.luogu.com.cn/problem/P3378">P3378
+【模板】堆</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P3377">P3377
+【模板】左偏树（可并堆)</a></p>
+<p><a href="https://www.luogu.com.cn/problem/P1628">P1628
+合并序列</a></p>
+]]></content>
+  </entry>
+  <entry>
     <title>算法笔记-并查集</title>
     <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%B9%B6%E6%9F%A5%E9%9B%86/</url>
     <content><![CDATA[<blockquote>
@@ -308,7 +523,7 @@ r+c\right)+4\left(a\left(\frac{l+r}{2}\right)^{2}+b\left(\frac{l+r}{2}\right)+c\
 \end{aligned}\]</span></p>
 <p>稍微改写下形式就得到了辛普森公式：</p>
 <p><span class="math display">\[\int_{l}^{r} f(x) \mathrm{d}
-x=\dfrac{r-l\left(f(l)+f(r)+4
+x=\dfrac{(r-l)\left(f(l)+f(r)+4
 f\left(\frac{l+r}{2}\right)\right)}{6}\]</span></p>
 <ol type="1">
 <li>辛普森法</li>
@@ -345,221 +560,6 @@ class="math inline">\(\int^\infty_0\)</span>，可辛普森法只能求定值积
 时，积分发散，就不用求了，剩下的套模板 1 即可。</p>
 <p>精度多取两位保险。</p>
 <figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">const</span> <span class="type">double</span> eps = <span class="number">1e-8</span>;</span><br><span class="line"><span class="type">double</span> a, b, c, d, l, r;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">f</span><span class="params">(<span class="type">double</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">pow</span>(x, (a / x) - x);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">simpson</span><span class="params">(<span class="type">double</span> l, <span class="type">double</span> r)</span> </span>&#123;</span><br><span class="line">	<span class="type">double</span> mid = (l + r) / <span class="number">2.0</span>;</span><br><span class="line">	<span class="keyword">return</span> (<span class="built_in">f</span>(l) + <span class="number">4.0</span> * <span class="built_in">f</span>(mid) + <span class="built_in">f</span>(r)) * (r - l) / <span class="number">6.0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">double</span> <span class="title">asr</span><span class="params">(<span class="type">double</span> l, <span class="type">double</span> r, <span class="type">double</span> eps, <span class="type">double</span> ans)</span> </span>&#123;</span><br><span class="line">	<span class="type">double</span> mid = (l + r) / <span class="number">2.0</span>, l_ = <span class="built_in">simpson</span>(l, mid), r_ = <span class="built_in">simpson</span>(mid, r);</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">fabs</span>(l_ + r_ - ans) &lt;= <span class="number">15.0</span> * eps) <span class="keyword">return</span> l_ + r_ + (l_ + r_ - ans) / <span class="number">15.0</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">asr</span>(l, mid, eps / <span class="number">2.0</span>, l_) + <span class="built_in">asr</span>(mid, r, eps / <span class="number">2.0</span>, r_);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	ios::<span class="built_in">sync_with_stdio</span>(<span class="literal">false</span>), cin.<span class="built_in">tie</span>(<span class="literal">nullptr</span>), cout.<span class="built_in">tie</span>(<span class="literal">nullptr</span>);</span><br><span class="line">	cin &gt;&gt; a;</span><br><span class="line">	<span class="keyword">if</span> (a &lt; <span class="number">0</span>) <span class="keyword">return</span> cout &lt;&lt; <span class="string">&quot;orz&quot;</span>, <span class="number">0</span>;</span><br><span class="line">	cout &lt;&lt; fixed &lt;&lt; <span class="built_in">setprecision</span>(<span class="number">5</span>) &lt;&lt; <span class="built_in">asr</span>(eps, <span class="number">15.0</span>, eps, <span class="built_in">simpson</span>(l, r));</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-]]></content>
-  </entry>
-  <entry>
-    <title>算法笔记-堆</title>
-    <url>/2023/10/02/%E7%AE%97%E6%B3%95%E7%AC%94%E8%AE%B0-%E5%A0%86/</url>
-    <content><![CDATA[<blockquote>
-<p>堆（$ \rm
-Heap$）是计算机科学中一类特殊的数据结构的统称。堆通常是一个可以被看做一棵树的数组对象。堆总是满足下列性质：</p>
-</blockquote>
-<blockquote>
-<ul>
-<li>堆中某个结点的值总是不大于或不小于其父结点的值；</li>
-<li>堆总是一棵完全二叉树。</li>
-</ul>
-</blockquote>
-<p>上面提到的性质 <span class="math inline">\(1\)</span>
-中，如果不大于即为大根堆，如果不小于即为小根堆，看图：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaPP0S.png" /></p>
-<p>如上是大根堆。</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaPDtH.png" /></p>
-<p>如上是小根堆。</p>
-<p>堆实质上是一颗二叉树，二叉树的存储使用一维数组，编号为 <span
-class="math inline">\(i\)</span> 的结点的父结点编号为 <span
-class="math inline">\(\left\lfloor\dfrac{i}{2}\right\rfloor\)</span>，左儿子编号为
-<span class="math inline">\(2 \times i\)</span>，右儿子编号为 <span
-class="math inline">\(2 \times i +1\)</span>。</p>
-<p>因为性质 <span class="math inline">\(1\)</span>，堆还能用于排序。</p>
-<h1 id="section"></h1>
-<p><strong>手写堆：</strong></p>
-<p>手写堆虽然麻烦，但是效率比较高，尽管有替代品但是这是理解堆及二叉树思想的最好方法，<strong>以下讲解为小根堆</strong>。</p>
-<p>首先三个 <code>#define</code></p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> f(x) (((x)-1)/2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> l(x) ((x)*2+1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> r(x) ((x)*2+2)</span></span><br></pre></td></tr></table></figure>
-<p>三个宏定义分别表示 <span class="math inline">\(x\)</span>
-结点的<strong>父亲</strong>，<strong>左儿子</strong>，<strong>右儿子</strong>（<span
-class="math inline">\(+1+2\)</span> 为个人喜好）。</p>
-<p>操作如下：</p>
-<ol type="1">
-<li><code>push</code> 向堆中压入一个元素</li>
-<li><code>pop</code> （也有写法写作 <code>del</code>(<span
-class="math inline">\(\tt
-delete\)</span>)）从堆中弹出（删除）堆顶元素</li>
-<li><code>top</code> 查询堆顶元素</li>
-</ol>
-<ul>
-<li><code>push</code>：</li>
-</ul>
-<p>压入一个元素，首先堆元素数量（大小）<code>siz</code> 需要 <span
-class="math inline">\(+1\)</span>，从堆底加入，如果不满足小根堆的性质（见堆的性质
-<span
-class="math inline">\(1\)</span>），则不断上调直至满足性质（即父结点小于当前结点）。</p>
-<p>例如对此堆执行 <code>push(0)</code></p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaPDtH.png" /></p>
-<p>首先在堆底插入：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaiNCj.png" /></p>
-<p>因为 <span class="math inline">\(3&gt;0\)</span> 所以上调：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaioVO.png" /></p>
-<p>因为 <span class="math inline">\(1&gt;0\)</span> 所以继续上调：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSai7Ie.png" /></p>
-<p>因为 <span class="math inline">\(0&lt;1\)</span> 所以操作结束。</p>
-<p><code>push</code> 函数为：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = siz++;<span class="comment">//在堆底插入</span></span><br><span class="line">	<span class="comment">/*上调操作*/</span><span class="keyword">while</span> (pos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[<span class="built_in">f</span>(pos)] &lt;= x) &#123;<span class="comment">//如果父结点小于当前结点，满足性质</span></span><br><span class="line">			<span class="keyword">break</span>;<span class="comment">//停止</span></span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[<span class="built_in">f</span>(pos)], pos = <span class="built_in">f</span>(pos);<span class="comment">//互换位置</span></span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;<span class="comment">//确定位置后赋值</span></span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>pop</code>：</li>
-</ul>
-<p>首先使用堆底结点替换掉堆顶元素（先删掉堆顶元素），然后对替换上来的结点不断下调直至满足性质。</p>
-<p>我们对刚刚进行过 <code>push</code> 操作的堆进行 <code>pop</code>
-操作：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSai7Ie.png" /></p>
-<p>执行 <code>pop</code> 使用 <span class="math inline">\(3\)</span>
-代替 <span class="math inline">\(0\)</span> 变为：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaF9Ig.png" /></p>
-<p>因为 <span class="math inline">\(3&gt;1\)</span> 所以下调：</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaFFRs.png" /></p>
-<p>因为 <span class="math inline">\(1\)</span>
-已经是根结点（整个堆/整棵树中最小的），所以操作结束。</p>
-<p><code>pop</code> 函数为：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = <span class="number">0</span>, x = heap[--siz];</span><br><span class="line">	<span class="keyword">while</span> (<span class="built_in">l</span>(pos) &lt; siz) &#123;</span><br><span class="line">		<span class="type">int</span> t = (heap[<span class="built_in">l</span>(pos)] &lt; heap[<span class="built_in">r</span>(pos)]) ? <span class="built_in">l</span>(pos) : <span class="built_in">r</span>(pos);<span class="comment">//找较小儿子</span></span><br><span class="line">		<span class="comment">/*下调操作*/</span><span class="keyword">if</span> (heap[t] &gt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[t], pos = t;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	heap[pos] = x;<span class="comment">//同上</span></span><br><span class="line">  	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li><code>top</code>：</li>
-</ul>
-<p>返回堆顶元素，也就是最小的元素。</p>
-<p><img src="https://s1.ax1x.com/2023/01/28/pSaFFRs.png" /></p>
-<p>执行 <code>top</code> ，返回顶端的 <span
-class="math inline">\(1\)</span> 且 <span
-class="math inline">\(1\)</span> 为堆中的最小元素。</p>
-<p><code>top</code> 函数为：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="section-1"></h1>
-<p><strong>代码</strong>：</p>
-<p><em>此代码可过模板题</em></p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;bits/stdc++.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> f(x) (((x)-1)/2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> l(x) ((x)*2+1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> r(x) ((x)*2+2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> JS ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr)</span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std;</span><br><span class="line"><span class="type">int</span> heap[<span class="number">1000001</span>], siz;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">push</span><span class="params">(<span class="type">int</span> x)</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = siz++;</span><br><span class="line">	<span class="keyword">while</span> (pos &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">if</span> (heap[<span class="built_in">f</span>(pos)] &lt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[<span class="built_in">f</span>(pos)], pos = <span class="built_in">f</span>(pos);</span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="type">int</span> pos = <span class="number">0</span>, x = heap[--siz];</span><br><span class="line">	<span class="keyword">while</span> (<span class="built_in">l</span>(pos) &lt; siz) &#123;</span><br><span class="line">		<span class="type">int</span> t = (heap[<span class="built_in">l</span>(pos)] &lt; heap[<span class="built_in">r</span>(pos)]) ? <span class="built_in">l</span>(pos) : <span class="built_in">r</span>(pos);</span><br><span class="line">		<span class="keyword">if</span> (heap[t] &gt;= x) &#123;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		heap[pos] = heap[t], pos = t;</span><br><span class="line">	&#125;</span><br><span class="line">	heap[pos] = x;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">top</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> heap[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> T, num, op;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	JS;</span><br><span class="line">	cin &gt;&gt; T;</span><br><span class="line">	<span class="keyword">while</span> (T--) &#123;</span><br><span class="line">		cin &gt;&gt; op;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">1</span>) &#123;</span><br><span class="line">			cin &gt;&gt; num;</span><br><span class="line">			<span class="built_in">push</span>(num);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">2</span>) &#123;</span><br><span class="line">			cout &lt;&lt; <span class="built_in">top</span>() &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">if</span> (op == <span class="number">3</span>) &#123;</span><br><span class="line">			<span class="built_in">pop</span>();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="section-2"></h1>
-<p><strong>STL</strong></p>
-<p>STL 实现的堆有两种：</p>
-<ol type="1">
-<li><p><code>std::heap</code>（堆）</p></li>
-<li><p><code>std::priority_queue</code>（优先队列）</p></li>
-</ol>
-<ul>
-<li><code>std::heap</code></li>
-</ul>
-<p>在头文件 <code>&lt;algotithm&gt;</code> 中，使用 <code>heap</code> 需
-<code>include</code> 或使用万能头。</p>
-<p><code>make_heap()</code>：</p>
-<p>先指定一个容器的范围建堆，常用
-<code>vector</code>，建堆执行后最大值在所给范围的最左端，<strong>其他值并未排序</strong>。</p>
-<p>使用方法：<code>make_heap(v.begin(),v.end,_Comp/*自定义比较函数，非必要*/);</code><em><code>v</code>
-代表 <code>vector</code> 的名称</em></p>
-<p><code>v.push_back()</code>
-压入一个元素，但元素并未排序（没有进行上调操作）。</p>
-<p><code>push_heap()</code>
-对刚刚压入元素的堆执行上调，用法：<code>push_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
-<p><code>pop_heap()</code> 等价于手写堆的 <code>pop</code>
-弹出（删除）堆顶（最大值），用法：<code>pop_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
-<p><code>sort_heap()</code>
-执行堆排序，可得到一个有序序列，用法：<code>sort_heap(v.begin(),v.end(),cmp/*自定义比较函数，非必要*/);</code></p>
-<ul>
-<li><code>std::priority_queue</code>：</li>
-</ul>
-<p>底层使用 <code>std::heap</code> 实现。</p>
-<p>定义：<code>priority_queue&lt;T/*数据类型*/,Cotainer/*容器*/,Compare/*比较规则，可以使用自定义*/&gt;</code></p>
-<p>自带两种比较函数：</p>
-<ol type="1">
-<li><code>greater&lt;T/*数据类型*/&gt;</code> 小根堆</li>
-<li><code>less&lt;T/*数据类型*/&gt;</code> 大根堆</li>
-</ol>
-<p>操作：</p>
-<p><code>push()</code> 压入元素，构造完毕后压入（执行上调）。</p>
-<p><code>emplace()</code>同时执行构造和压入（执行上调）。</p>
-<p><code>pop()</code> 弹出堆顶。</p>
-<p><code>top()</code> 返回堆顶元素。</p>
-<p><code>size()</code> 返回堆大小（元素个数）。</p>
-<p><code>empty()</code> 查询堆是否为空，返回值为 <code>bool</code>
-类型，堆为空时返回 <code>true</code>，否则返回 <code>false</code>。</p>
-<p>使用方法都为：<code>q.成员函数()</code> <em><code>q</code> 代表
-<code>priority_queue</code> 的名称</em>。</p>
-<h1 id="section-3"></h1>
-<p>**pb__ds**</p>
-<p><code>pb__ds</code> （<span class="math inline">\(\tt Policy-Based\
-Data\ Structures\)</span>）库包含于 <code>__gnu_pbds</code>
-命名空间里，使用其中的堆需要两个头文件：</p>
-<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ext/pb_ds/assoc_container.hpp&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;ext/pb_ds/priority_queue.hpp&gt;</span> </span></span><br></pre></td></tr></table></figure>
-<p>**万能头不能解决问题，<code>&lt;bits/stdc++.h&gt;</code>
-只包含标准库的所有头文件，而pb__ds库是扩展库！**</p>
-<p>定义方法：</p>
-<p><code>__gnu_pbds::priority_queue&lt;T, Compare = std::less&lt;T&gt;, Tag = __gnu_pbds::pairing_heap_tag, Allocator = std::allocator&lt;char&gt;&gt;</code></p>
-<p><code>Tag</code> 决定了堆的类型，共有五种堆：</p>
-<ol type="1">
-<li><code>__gnu_pbds::pairing_heap_tag</code> 配对堆
-<code>push,pop</code> 效率较好，<code>push,join</code> 复杂度为 <span
-class="math inline">\(\mathcal{O}(1)\)</span>，但 <code>pop</code>
-的最差复杂度很高。</li>
-<li><code>__gnu_pbds::binary_heap_tag</code> 二叉堆
-<code>push,pop</code> 效率高。</li>
-<li><code>__gnu_pbds::binomial_heap_tag</code> 二项堆
-<code>push,pop</code> 效率较差，但 <code>pop</code>
-函数的时间复杂度最慢只有亚线性。</li>
-<li><code>__gnu_pbds::rc_binomial_heap_tag</code> 冗余计数二项堆
-相比二项堆 <code>push,pop</code> 更差，但是 <code>push</code> <span
-class="math inline">\(\mathcal{O}(1)\)</span>。</li>
-<li><code>__gnu_pbds::thin_heap_tag</code>
-斐波那契堆（注：合并堆的复杂度与斐波那契堆不同）适合图论算法，在一些方面甚至优于斐波那契堆，不过由于封装过紧，常数大，反而在非图论算法上最劣。</li>
-</ol>
-<p>操作：</p>
-<ol type="1">
-<li><code>push()</code> 压入元素。</li>
-<li><code>pop()</code> 弹出堆顶元素。</li>
-<li><code>top()</code> 返回堆顶元素。</li>
-<li><code>empty()</code> 返回是否为空（返回值 <code>bool</code>
-类型）。</li>
-<li><code>size()</code> 返回堆大小。</li>
-<li><code>modify(iterator, key)</code> 修改迭代器位置的值。</li>
-<li><code>erase(iterator)</code> 删除迭代器位置的值。</li>
-<li><code>join()</code> 把另一个堆和当前堆合并并清空被合并的堆。</li>
-</ol>
-<p>时间复杂度：</p>
-<p><span class="math inline">\(\begin{array}{llllll} &amp; \text { push
-} &amp; \text {pop } &amp; \text { modify } &amp; \text { erase } &amp;
-\text { join } \\ \small \text { std::priority\_queue } &amp; \Theta(n)
-/ \Theta(\log n) &amp;\Theta(\log n) &amp; \Theta(n \log n) &amp;
-\Theta(n \log n) &amp; \Theta(n \log n) \\ \small \text {
-\_\_gnu\_pbds::pairing\_heap\_tag } &amp; \mathcal{O}(1) &amp; \Theta(n)
-/ \Theta(\log n) &amp;\Theta(n) / \Theta(\log n) &amp; \Theta(n) /
-\Theta(\log n)&amp; \mathcal{O}(1) \\ \small \text {
-\_\_gnu\_pbds::binary\_heap\_tag } &amp; \Theta(n) / \Theta(\log n)
-&amp;\Theta(n) / \Theta(\log n) &amp;\Theta(n) &amp; \Theta(n) &amp;
-\Theta(n) \\ \small \text { \_\_gnu\_pbds::binomial\_heap\_tag } &amp;
-\Theta(\log n) / \mathcal{O}(1) &amp;\Theta(\log n) &amp; \Theta(\log n)
-&amp; \Theta(\log n) &amp; \Theta(\log n) \\ \small \text {
-\_\_gnu\_pbds::rc\_binomial\_heap\_tag } &amp; \mathcal{O}(1) &amp;
-\Theta(\log n) &amp; \Theta(\log n) &amp; \Theta(\log n) &amp;
-\Theta(\log n) \\ \small \text { \_\_gnu\_pbds::thin\_heap\_tag } &amp;
-\mathcal{O}(1) &amp; \Theta(n) / \Theta(\log n) &amp;\Theta(\log n) /
-\mathcal{O}(1) &amp;\Theta(n) / \Theta(\log n) &amp; \mathcal{O}(n)
-\end{array}\)</span></p>
-<h1 id="section-4"></h1>
-<p><strong>斐波那契堆</strong>：</p>
-<p>斐波那契堆是堆的集合，比二叉堆拥有更高的效率，但是由于常数比较大而且不好写所以不常用。</p>
-<p><strong>堆优化 dijkstra</strong>：</p>
-<p>每次更新最短距离的时候把对应的元素上调，每次从小根堆中取堆顶做下一次要用的顶点，从复杂度
-<span class="math inline">\(\mathcal{O}(V^2)\)</span> 优化到 <span
-class="math inline">\(\mathcal{O}(E \log V)\)</span>。</p>
-<h1 id="section-5"></h1>
-<p><strong>复杂度</strong>：</p>
-<p>除建堆和 <code>top()</code> 操作是 <span
-class="math inline">\(\mathcal{O}(1)\)</span> 外，其余操作全部为 <span
-class="math inline">\(\mathcal{O}(\log n)\)</span>。</p>
-<h1 id="section-6"></h1>
-<p><strong>例题</strong>：</p>
-<p><a href="https://www.luogu.com.cn/problem/P3378">P3378
-【模板】堆</a></p>
-<p><a href="https://www.luogu.com.cn/problem/P3377">P3377
-【模板】左偏树（可并堆)</a></p>
-<p><a href="https://www.luogu.com.cn/problem/P1628">P1628
-合并序列</a></p>
 ]]></content>
   </entry>
 </search>
